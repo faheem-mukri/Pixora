@@ -1,0 +1,150 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1001;
+  transition: background-color 0.3s;
+}
+
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.modal-image-container {
+  width: 100%;
+  max-height: 500px;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+}
+
+.modal-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.modal-info {
+  padding: 30px;
+}
+
+.modal-header {
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  font-size: 24px;
+  color: #262626;
+  margin-bottom: 8px;
+}
+
+.photographer {
+  color: #4A4A4A;
+  font-size: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.btn-save,
+.btn-view {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  text-align: center;
+  display: inline-block;
+}
+
+.btn-save {
+  background-color: #E60023;
+  color: white;
+}
+
+.btn-save:hover {
+  background-color: #AD081B;
+}
+
+.btn-view {
+  background-color: #F0F0F0;
+  color: #262626;
+  border: 2px solid #E0E0E0;
+}
+
+.btn-view:hover {
+  background-color: #E0E0E0;
+}
+
+.modal-details {
+  border-top: 2px solid #E8E8E8;
+  padding-top: 15px;
+  font-size: 12px;
+  color: #4A4A4A;
+}
+
+.modal-details p {
+  margin: 8px 0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .modal-content {
+    border-radius: 0;
+  }
+
+  .modal-info {
+    padding: 20px;
+  }
+
+  .modal-header h2 {
+    font-size: 20px;
+  }
+
+  .btn-save,
+  .btn-view {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+}

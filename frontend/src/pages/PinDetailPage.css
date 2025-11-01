@@ -1,0 +1,348 @@
+.pin-detail-page {
+  background: white;
+  min-height: 100vh;
+}
+
+/* Header */
+.pin-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+}
+
+.back-button {
+  background: #F0F0F0;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #262626;
+}
+
+.back-button:hover {
+  background: #E0E0E0;
+}
+
+/* Main Container */
+.pin-main-container {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 20px;
+  align-items: start;
+}
+
+/* Image Section */
+.pin-image-container {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #F5F5F5;
+  position: sticky;
+  top: 80px;
+}
+
+.pin-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 600px;
+  object-fit: contain;
+}
+
+/* Right Sidebar */
+.pin-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Action Buttons */
+.pin-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-save,
+.btn-share {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-save {
+  background-color: #E60023;
+  color: white;
+}
+
+.btn-save:hover {
+  background-color: #AD081B;
+}
+
+.btn-save.saved {
+  background-color: #00B894;
+}
+
+.btn-save.saved:hover {
+  background-color: #009872;
+}
+
+.btn-share {
+  background-color: #F0F0F0;
+  color: #262626;
+  border: 1px solid #E0E0E0;
+}
+
+.btn-share:hover {
+  background-color: #E0E0E0;
+}
+
+/* Photographer Section */
+.photographer-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: #F5F5F5;
+  border-radius: 12px;
+  gap: 12px;
+}
+
+.photographer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.photographer-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #E60023;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.photographer-info {
+  flex: 1;
+}
+
+.photographer-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0;
+  margin-bottom: 4px;
+}
+
+.photographer-role {
+  font-size: 12px;
+  color: #4A4A4A;
+  margin: 0;
+}
+
+.btn-follow {
+  padding: 8px 16px;
+  background-color: #E60023;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+
+.btn-follow:hover {
+  background-color: #AD081B;
+}
+
+/* About Section */
+.about-section {
+  border-top: 1px solid #E0E0E0;
+  padding-top: 16px;
+}
+
+.about-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0 0 12px 0;
+}
+
+.pin-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.pin-description {
+  font-size: 14px;
+  color: #4A4A4A;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Source Link */
+.source-link {
+  margin-top: 16px;
+}
+
+.view-source {
+  font-size: 14px;
+  color: #E60023;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.view-source:hover {
+  text-decoration: underline;
+}
+
+/* Tags Section */
+.tags-section {
+  border-top: 1px solid #E0E0E0;
+  padding-top: 16px;
+}
+
+.tags-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0 0 12px 0;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 8px 12px;
+  background: #F0F0F0;
+  color: #262626;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tag:hover {
+  background: #E60023;
+  color: white;
+}
+
+/* Related Section */
+.related-section {
+  border-top: 1px solid #E0E0E0;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.related-section h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #262626;
+  margin: 0 0 20px 0;
+}
+
+/* Error State */
+.loading,
+.error {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 16px;
+  color: #4A4A4A;
+}
+
+.error h2 {
+  color: #E60023;
+  margin-bottom: 20px;
+}
+
+.back-btn {
+  background: #E60023;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.back-btn:hover {
+  background: #AD081B;
+}
+
+/* Responsive Design */
+@media (max-width: 1000px) {
+  .pin-main-container {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .pin-image-container {
+    position: relative;
+    top: 0;
+  }
+
+  .pin-sidebar {
+    padding: 20px 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .pin-main-container {
+    padding: 20px 12px;
+  }
+
+  .pin-image-container {
+    border-radius: 12px;
+  }
+
+  .photographer-section {
+    flex-wrap: wrap;
+  }
+
+  .btn-follow {
+    width: 100%;
+  }
+
+  .pin-actions {
+    gap: 8px;
+  }
+
+  .btn-save,
+  .btn-share {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+}

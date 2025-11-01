@@ -1,0 +1,114 @@
+.recommendations-page {
+  padding: 20px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+.back-button {
+  background: #F0F0F0;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: all 0.3s;
+  color: #262626;
+}
+
+.back-button:hover {
+  background: #E0E0E0;
+}
+
+.recommendations-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #262626;
+  margin: 0 0 8px 0;
+}
+
+.based-on {
+  font-size: 14px;
+  color: #4A4A4A;
+  margin: 0;
+}
+
+.based-on strong {
+  color: #E60023;
+  font-weight: 600;
+}
+
+.image-card-wrapper {
+  width: 100%;
+  cursor: pointer;
+}
+
+.image-card {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border-radius: 16px;
+}
+
+.no-recommendations {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.no-recommendations h2 {
+  font-size: 24px;
+  color: #262626;
+  margin-bottom: 12px;
+}
+
+.no-recommendations p {
+  font-size: 16px;
+  color: #4A4A4A;
+  margin-bottom: 24px;
+}
+
+.btn-home {
+  padding: 12px 28px;
+  background-color: #E60023;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-home:hover {
+  background-color: #AD081B;
+}
+
+
+@media (max-width: 600px) {
+  .recommendations-page {
+    padding: 12px;
+  }
+
+  .recommendations-header h1 {
+    font-size: 24px;
+  }
+
+  .based-on {
+    font-size: 12px;
+  }
+}

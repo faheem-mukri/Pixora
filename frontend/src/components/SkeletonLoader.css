@@ -1,0 +1,49 @@
+.skeleton-grid {
+  display: grid;
+  gap: 12px;
+  padding: 12px 16px;
+  width: 100%;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #e4e4e4 50%,
+    #f0f0f0 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-image {
+  width: 100%;
+  aspect-ratio: 3/4;
+}
+
+/* Responsive — use auto-fill so it adapts without fighting inline styles */
+@media (max-width: 600px) {
+  .skeleton-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    padding: 8px 10px;
+    gap: 8px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 750px) {
+  .skeleton-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+@media (min-width: 751px) and (max-width: 900px) {
+  .skeleton-grid { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+@media (min-width: 901px) and (max-width: 1200px) {
+  .skeleton-grid { grid-template-columns: repeat(5, 1fr) !important; }
+}

@@ -15,70 +15,72 @@ function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     const result = await login(email, password);
-
     if (result.success) {
       navigate('/');
     } else {
-      setError(result.error);
+      setError(result.message || 'Login failed');
     }
-
     setLoading(false);
   };
 
   return (
     <div className="auth-page">
-      <div className="auth-container">
-        {/* Logo */}
-        <div className="auth-logo">
-          <span className="logo-icon">📌</span>
-          <span className="logo-text">Pixora</span>
-        </div>
-
-        {/* Form */}
-        <div className="auth-form-container">
-          <h1>Welcome Back</h1>
-          <p className="auth-subtitle">Sign in to your Pixora account</p>
-
-          {error && <div className="error-message">{error}</div>}
-
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                disabled={loading}
-              />
-            </div>
-
-            <button type="submit" className="btn-submit" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-
-          <p className="auth-footer">
-            Don't have an account?{' '}
-            <Link to="/signup" className="auth-link">
-              Create one
-            </Link>
+      {/* Left decorative panel */}
+      <div className="auth-panel-left">
+        <div className="auth-brand">
+          <span className="auth-brand-logo">📌</span>
+          <h1 className="auth-brand-name">Pixora</h1>
+          <p className="auth-brand-tagline">
+            Discover and save beautiful images that inspire you every day.
           </p>
+        </div>
+      </div>
+
+      {/* Right form panel */}
+      <div className="auth-panel-right">
+        <div className="auth-container">
+          <div className="auth-form-container">
+            <h1>Welcome back</h1>
+            <p className="auth-subtitle">Sign in to continue to Pixora</p>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <form onSubmit={handleSubmit} className="auth-form">
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <button type="submit" className="btn-submit" disabled={loading}>
+                {loading ? 'Signing in...' : 'Sign in'}
+              </button>
+            </form>
+
+            <p className="auth-footer">
+              Don't have an account?{' '}
+              <Link to="/signup" className="auth-link">Create one</Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

@@ -1,42 +1,32 @@
 .recommendations-page {
-  padding: 20px;
-  margin: 0 auto;
-  min-height: 100vh;
-  background-color: #ffffff;
+  padding: 0px 24px;
+  max-width: 100%;
+  min-height: calc(100vh - 60px);
+  background-color: var(--background);
 }
 
-.back-button {
-  background: #F0F0F0;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 24px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-bottom: 12px;
-  transition: all 0.3s;
-  color: #262626;
-}
-
-.back-button:hover {
-  background: #E0E0E0;
+.recommendations-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .recommendations-header h1 {
+  font-family: var(--font-display);
   font-size: 32px;
-  font-weight: 700;
-  color: #262626;
+  font-weight: 500;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
 }
 
 .based-on {
   font-size: 14px;
-  color: #4A4A4A;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .based-on strong {
-  color: #E60023;
+  color: var(--primary-color);
   font-weight: 600;
 }
 
@@ -67,35 +57,47 @@
 
 .no-recommendations {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
+}
+
+.no-recommendations-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.6;
 }
 
 .no-recommendations h2 {
   font-size: 24px;
-  color: #262626;
+  color: var(--text-primary);
   margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .no-recommendations p {
   font-size: 16px;
-  color: #4A4A4A;
+  color: var(--text-secondary);
   margin-bottom: 24px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .btn-home {
   padding: 12px 28px;
-  background-color: #E60023;
+  background-color: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 24px;
+  border-radius: var(--radius-xl);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: var(--transition);
 }
 
 .btn-home:hover {
-  background-color: #AD081B;
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 

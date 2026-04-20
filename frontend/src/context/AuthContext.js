@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
+import api from '../utils/api';
 
 export const AuthContext = createContext();
 
@@ -22,49 +23,38 @@ export const AuthProvider = ({ children }) => {
     // Login function
   const login = async (email, password) => {
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+      const response = await api.post("/api/auth/login", {
+        email,
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.msg || "Login failed");
-      }
+      const data = response.data;
 
       // Save token and user
       localStorage.setItem("pixora_token", data.token);
       localStorage.setItem("pixora_user", JSON.stringify(data.user));
 
-        setToken(data.token);
-        setUser(data.user);
+      setToken(data.token);
+      setUser(data.user);
 
-        return { success: true };
+      return { success: true };
     } catch (error) {
-      return { success: false, message: error.message };
+      const message = error.response?.data?.msg || error.message || "Login failed";
+      return { success: false, message };
     }
   };
 
     //register function
     const register = async (username, displayName, email, password) => {
     try {
-        const response = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, displayName, email, password }),
+        const response = await api.post("/api/auth/register", {
+          username,
+          displayName,
+          email,
+          password,
         });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-        throw new Error(data.msg || "Registration failed");
-        }
+        const data = response.data;
 
         // Save token and user
         localStorage.setItem("pixora_token", data.token);
@@ -75,7 +65,8 @@ export const AuthProvider = ({ children }) => {
 
         return { success: true };
         } catch (error) {
-            return { success: false, message: error.message };
+            const message = error.response?.data?.msg || error.message || "Registration failed";
+            return { success: false, message };
         }
     };
 

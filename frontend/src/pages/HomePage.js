@@ -1,102 +1,87 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import LoadingSpinner from '../components/LoadingSpinner';
-import RecommendationsBanner from '../components/RecommendationsBanner';
+import SkeletonLoader from '../components/SkeletonLoader';
+import ImageCard from '../components/ImageCard';
 import './HomePage.css';
 
 function HomePage() {
-    const [images, setImages] = useState([]);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [isInitialLoading, setIsInitialLoading] = useState(true);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    //fetch image from backend
-    const fetchImages = async (isNewSearch = false) => {
-        try {
-            const currentPage = isNewSearch ? 1 : page;
-            const endpoint = `/api/search/curated?page=${currentPage}&per_page=30`;
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-            const response = await axios.get(`http://localhost:5000${endpoint}`);
+  const fetchCurated = useCallback(async (pageNum) => {
+    try {
+      const res = await api.get('/api/search/curated', {
+        params: { page: pageNum, per_page: 30 }
+      });
 
-            if (isNewSearch) {
-                setImages(response.data.photos);
-                setPage(2);
-                setIsInitialLoading(false);
-            } else {
-                setImages([...images, ...response.data.photos]);
-                setPage(page + 1);
-            }
+      const photos = res.data.photos || [];
 
-            if (response.data.photos.length < 30) {
-                setHasMore(false);
-            }
-        } catch (error) {
-            console.error('Error fetching images:', error);
-            setIsInitialLoading(false);
-        }
-    };
+      setImages(prev => {
+        // Deduplicate
+        const existingIds = new Set(prev.map(p => p.id));
+        const fresh = photos.filter(p => !existingIds.has(p.id));
+        return [...prev, ...fresh];
+      });
 
-    // load initial images on component mount
-    useEffect(() => {
-        console.log('HomePage loaded'); // DEBUG
-        fetchImages(true);
-    }, []);
+      // Pexels curated has ~8000 photos — keep going until empty
+      if (photos.length < 30) setHasMore(false);
 
-    // Handle image click - navigate to pin detail page
-    const handleImageClick = (imageId) => {
-        navigate(`/pin/${imageId}`);
-    };
+      setIsInitialLoading(false);
+    } catch (err) {
+      console.error('Failed to fetch curated:', err);
+      setIsInitialLoading(false);
+    }
+  }, []);
 
-    return (
-        <div className="home-page">
-             {/* Recommendations Banner */}
-            <RecommendationsBanner />
+  // Load page 1 on mount
+  useEffect(() => {
+    fetchCurated(1);
+  }, [fetchCurated]);
 
-            {/* Masonry Grid with Natural Aspect Ratios */}
-            {!isInitialLoading && (
-                <InfiniteScroll
-                    dataLength={images.length}
-                    next={() => fetchImages(false)}
-                    hasMore={hasMore}
-                    loader={<LoadingSpinner key="loader" />}
-                    threshold={0.8}
-                >
-                    <ResponsiveMasonry
-                        columnsCountBreakPoints={{ 350: 3, 750: 4, 900: 5, 1200: 6 }}
-                    >
-                        <Masonry gutter="15px">
-                            {images.map((image) => {
-                                // Calculate aspect ratio from image dimensions
-                                const aspectRatio = image.height / image.width;
-                                
-                                return (
-                                    <div key={image.id} className="image-card-wrapper">
-                                        <div 
-                                            className="image-card"
-                                            style={{
-                                                paddingBottom: `${aspectRatio * 100}%`
-                                            }}
-                                            onClick={() => handleImageClick(image.id)}
-                                        >
-                                            <img
-                                                src={image.src.large}
-                                                alt={image.alt || 'Pinterest image'}
-                                                className="image"
-                                            />
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </Masonry>
-                    </ResponsiveMasonry>
-                </InfiniteScroll>
-            )}
-        </div>
-    );
+  // Pass current page explicitly to avoid stale closure
+  const loadMore = useCallback(() => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchCurated(nextPage);
+  }, [page, fetchCurated]);
+
+  const handleImageClick = (imageId) => navigate(`/pin/${imageId}`);
+
+  return (
+    <div className="home-page">
+      {isInitialLoading ? (
+        <SkeletonLoader count={30} columns={6} />
+      ) : (
+        <InfiniteScroll
+          dataLength={images.length}
+          next={loadMore}
+          hasMore={hasMore}
+          scrollThreshold={0.7}
+        >
+          <ResponsiveMasonry
+            columnsCountBreakPoints={{ 350: 2, 750: 3, 900: 4, 1200: 5, 1500: 6 }}
+          >
+            <Masonry gutter="12px">
+              {images.map((image) => (
+                <ImageCard
+                  key={image.id}
+                  image={image}
+                  onClick={handleImageClick}
+                />
+              ))}
+            </Masonry>
+          </ResponsiveMasonry>
+        </InfiniteScroll>
+      )}
+    </div>
+  );
 }
 
 export default HomePage;

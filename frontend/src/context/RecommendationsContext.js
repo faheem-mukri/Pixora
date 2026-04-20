@@ -1,68 +1,43 @@
-import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { createContext, useState, useEffect, useRef } from 'react';
+import api from '../utils/api';
 import { useAuth } from '../hooks/useAuth';
 
 export const RecommendationsContext = createContext();
 
 export function RecommendationsProvider({ children }) {
-  const [recommendations, setRecommendations] = useState([]);
   const [basedOn, setBasedOn] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const { token, isAuthenticated } = useAuth();
+  const [hasHistory, setHasHistory] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const hasFetched = useRef(false); // prevent refetch on re-renders
 
-  // Fetch recommendations in background
-  const fetchRecommendations = async () => {
-    if (!isAuthenticated || !token) {
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setHasHistory(false);
+      setBasedOn([]);
+      hasFetched.current = false;
       return;
     }
 
-    try {
-      setLoading(true);
-      setError(null);
+    // Only fetch once per session — context rerenders shouldn't retrigger API calls
+    if (hasFetched.current) return;
+    hasFetched.current = true;
 
-      const response = await axios.get(
-        'http://localhost:5000/api/search/recommendations',
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
+    const fetchMeta = async () => {
+      try {
+        const res = await api.get('/api/search/recommendations', {
+          params: { page: 1 }
+        });
+        const terms = res.data.basedOn || [];
+        setBasedOn(terms);
+        setHasHistory(terms.length > 0);
+      } catch (_) {}
+    };
 
-      setRecommendations(response.data.recommendations || []);
-      setBasedOn(response.data.basedOn || []);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching recommendations:', err);
-      setError(err.message);
-      setLoading(false);
-    }
-  };
-
-  // Fetch recommendations on mount and when token changes
-  useEffect(() => {
-    if (isAuthenticated && token) {
-      // Fetch immediately
-      fetchRecommendations();
-
-      // Re-fetch every 2 minutes to keep data fresh
-      const interval = setInterval(fetchRecommendations, 2 * 60 * 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [token, isAuthenticated]);
-
-  const value = {
-    recommendations,
-    basedOn,
-    loading,
-    error,
-    refetch: fetchRecommendations
-  };
+    fetchMeta();
+  }, [isAuthenticated]);
 
   return (
-    <RecommendationsContext.Provider value={value}>
+    <RecommendationsContext.Provider value={{ basedOn, hasHistory }}>
       {children}
     </RecommendationsContext.Provider>
   );

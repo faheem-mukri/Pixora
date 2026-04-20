@@ -1,13 +1,121 @@
-body {
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap');
+
+* {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+:root {
+  /* Brand */
+  --primary-color: #e60023;
+  --primary-hover: #c0001d;
+  --primary-light: #fff0f2;
+
+  /* Neutrals */
+  --text-primary: #0f0f0f;
+  --text-secondary: #6b6b6b;
+  --text-tertiary: #9e9e9e;
+  --border-color: #e8e8e8;
+  --border-strong: #d0d0d0;
+
+  /* Backgrounds */
+  --background: #ffffff;
+  --background-secondary: #f9f9f9;
+  --background-hover: #f2f2f2;
+
+  /* Shadows — more intentional depth */
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-xl: 0 20px 60px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 9999px;
+
+  /* Typography */
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'DM Serif Display', Georgia, serif;
+
+  /* Transitions */
+  --transition: all 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-slow: all 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background);
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+/* Focus states */
+*:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Transitions on interactive elements */
+button, a {
+  transition: var(--transition);
+}
+
+/* Scrollbar — subtle */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Mobile touchdowns — ensure buttons/inputs are easily tappable */
+@media (max-width: 768px) {
+  button, a, input, textarea {
+    min-height: 44px; /* iOS recommendation */
+  }
+  
+  body {
+    font-size: 16px; /* Prevents auto zoom on iOS input focus */
+  }
+}
+
+@media (max-width: 480px) {
+  * {
+    -webkit-tap-highlight-color: rgba(230, 0, 35, 0.1);
+  }
+  
+  button {
+    padding: 11px 16px !important;
+    min-height: 44px;
+  }
+  
+  input, textarea, select {
+    font-size: 16px;
+    padding: 11px 12px;
+    min-height: 44px;
+  }
 }

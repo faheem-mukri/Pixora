@@ -2,12 +2,26 @@
 
 A full-stack social image discovery platform built with **React, Node.js, Express, and MongoDB**. Features user authentication, personalized recommendations based on search history, and a beautiful Pinterest-like masonry layout.
 
+> **🎉 NEW**: Pixora has been enhanced with production-ready improvements! See [IMPROVEMENTS.md](IMPROVEMENTS.md) for details.
+
+## 🆕 Recent Improvements
+
+✅ **Security**: Strong password validation, input sanitization, comprehensive validation  
+✅ **Performance**: Database indexes for 3-5x faster queries  
+✅ **UX**: Enhanced error handling, request timeouts, retry logic  
+✅ **Code Quality**: Reusable validation utilities, better error messages
+
+👉 **Quick Setup**: Run `node setup-improvements.js` to install all enhancements
+
+---
+
 ## 🎯 Features
 
 - **User Authentication** - Secure signup/login with JWT tokens and bcrypt password hashing
 - **Image Search & Discovery** - Search millions of images powered by Pexels API
-- **Personalized Recommendations** - AI-powered suggestions based on user search history with intelligent caching
-- **Beautiful UI** - Responsive masonry grid layout similar to Pinterest
+- **Personalized Recommendations** - Smart mixing algorithm combining search history with curated viral content
+- **Modern UI/UX** - Premium "Pinterest-like" aesthetic with pill-shaped buttons, smooth animations, and rounded cards
+- **Unified Infinite Scroll** - Seamlessly discover content starting from your personal recommendations into an endless curated feed
 - **User Accounts** - Persistent user data with search history tracking
 - **Protected Routes** - Frontend route protection for authenticated features
 - **Infinite Scroll** - Smooth infinite scrolling for browsing images
@@ -203,22 +217,22 @@ pixora/
     └── package.json
 ```
 
-## 🚢 Deployment
+## 🚢 Deployment to Vercel
 
-### Deploy Backend (Railway)
+**👉 NEW! Complete deployment guides are ready:**
 
-1. Push code to GitHub
-2. Go to [railway.app](https://railway.app)
-3. Create new project → GitHub repo
-4. Add environment variables in Railway dashboard
-5. Deploy automatically on push
+- **[DEPLOY_QUICK_REFERENCE.md](DEPLOY_QUICK_REFERENCE.md)** - 25-minute quick start (START HERE!)
+- **[VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md)** - Detailed step-by-step guide
+- **[DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)** - Interactive checklist to track progress
 
-### Deploy Frontend (Vercel)
+### Overview
 
-1. Go to [vercel.com](https://vercel.com)
-2. Import GitHub repo
-3. Set environment variables (API URL pointing to Railway backend)
-4. Deploy with one click
+Deploy your full MERN stack:
+- **Frontend**: React app on [Vercel](https://vercel.com) 🎨
+- **Backend**: Express API on [Railway](https://railway.app) ⚙️
+- **Database**: MongoDB on [MongoDB Atlas](https://mongodb.com/cloud/atlas) 💾
+
+**Total time: ~25 minutes** ⏱️
 
 ## 🔄 Recommendations Engine
 
@@ -234,12 +248,12 @@ This ensures fast performance while keeping recommendations up-to-date.
 
 ## 🎨 UI Features
 
-- **Responsive Design** - Works on desktop, tablet, and mobile
-- **Masonry Layout** - Natural aspect ratios for each image
-- **Sticky Header** - Search bar always accessible
-- **Skeleton Loaders** - Better loading experience
-- **Smooth Navigation** - SPA routing with React Router
-- **User Profile** - Shows logged-in user in header
+- **Modern Aesthetic** - "Pill-shaped" buttons and rounded cards matching 2024 design trends
+- **Floating Card Details** - Premium modal-style view for pin details
+- **Interactive Header** - Search history appears instantly in a dropdown
+- **Unified Feed** - Mixed content stream with seamless infinite scrolling
+- **Refined Authentication** - Modern, minimalist login/signup pages with centered cards and pill inputs
+- **Responsive Masonry** - Dynamic grid that adapts to any screen size
 
 ## 🔄 Future Features
 

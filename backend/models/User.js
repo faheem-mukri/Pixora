@@ -3,71 +3,85 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new Schema(
   {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true
-    },
-    displayName: {
-      type: String,
-      default: ''
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true
-    },
-    password: {
-      type: String,
-      required: true
-    },
-    avatarUrl: {
-      type: String,
-      default: ''
-    },
-    
-    // Pixora-specific fields
-    searchHistory: [
-      {
-        query: String,
-        timestamp: { type: Date, default: Date.now }
+    // Basic user info
+    username: { type: String, required: true, unique: true, lowercase: true },
+    displayName: { type: String, default: '' },
+    email: { 
+      type: String, 
+      required: true, 
+      unique: true, 
+      lowercase: true,
+      validate: {
+        validator: function(v) {
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+        },
+        message: 'Please provide a valid email address'
       }
+    },
+    password: { type: String, required: true, minlength: 8 },
+    avatarUrl: { type: String, default: '' },
+    bio: { type: String, default: '', maxlength: 200 },
+
+    searchHistory: [
+      { query: String, timestamp: { type: Date, default: Date.now } }
     ],
+
+    // Upgraded savedPins — stores full pin metadata
     savedPins: [
       {
-        imageId: String,
-        imageUrl: String,
-        alt: String,
-        savedAt: { type: Date, default: Date.now }
+        imageId:     { type: String, required: true },
+        imageUrl:    { type: String, required: true }, // Cloudinary URL or Pexels URL
+        thumbnailUrl:{ type: String, default: '' },    // Cloudinary thumbnail
+        alt:         { type: String, default: '' },
+        title:       { type: String, default: '' },
+        description: { type: String, default: '' },
+        link:        { type: String, default: '' },
+        tags:        [String],
+        width:       { type: Number, default: 400 },
+        height:      { type: Number, default: 600 },
+        isUserCreated: { type: Boolean, default: false }, // true = uploaded by user
+        photographer:  { type: String, default: '' },
+        savedAt:     { type: Date, default: Date.now }
       }
     ],
-    // Social features (for future)
-    followers: [
+
+    // Pins created/uploaded by the user themselves
+    createdPins: [
       {
-        type: Schema.Types.ObjectId,
-        ref: 'User'
+        imageId:      { type: String, required: true },
+        imageUrl:     { type: String, required: true },
+        thumbnailUrl: { type: String, default: '' },
+        title:        { type: String, default: '' },
+        description:  { type: String, default: '' },
+        link:         { type: String, default: '' },
+        tags:         [String],
+        width:        { type: Number, default: 400 },
+        height:       { type: Number, default: 600 },
+        createdAt:    { type: Date, default: Date.now }
       }
     ],
-    following: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'User'
-      }
-    ]
+
+    // Social features
+    followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    following: [{ type: Schema.Types.ObjectId, ref: 'User' }]
   },
   { timestamps: true }
 );
 
-// Hash password before saving
+// Indexes for performance
+userSchema.index({ email: 1 });
+userSchema.index({ username: 1 });
+userSchema.index({ 'searchHistory.timestamp': -1 });
+userSchema.index({ 'savedPins.imageId': 1 });
+userSchema.index({ createdAt: -1 });
+
+//hash password before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-// Compare password method
 userSchema.methods.comparePassword = function (pwd) {
   return bcrypt.compare(pwd, this.password);
 };

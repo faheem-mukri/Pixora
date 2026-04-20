@@ -1,56 +1,38 @@
 .home-page {
-  padding: 20px;
-  margin: 0 auto;
-  background-color: #ffffff;
+  padding: 12px 16px;
+  max-width: 100%;
+  background-color: var(--background);
+  min-height: calc(100vh - 64px);
 }
 
-.feed-section {
-  margin: 40px 0 30px 0;
+/* Recommendations nudge */
+.home-rec-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--primary-light);
+  border-radius: var(--radius-xl);
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--primary-color);
+  font-weight: 500;
 }
 
-.feed-title {
-  font-size: 28px;
+.home-rec-banner button {
+  background: none;
+  border: none;
+  font-size: 14px;
   font-weight: 700;
-  color: #262626;
-  margin: 0;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #E0E0E0;
-}
-
-/* Wrapper for each image card */
-.image-card-wrapper {
-  width: 100%;
+  color: var(--primary-color);
   cursor: pointer;
-}
-
-/* This creates a container with dynamic aspect ratio */
-.image-card {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border-radius: 16px;
-  cursor: pointer;
-}
-
-/* The actual image - positioned absolutely to fill the container */
-.image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  border-radius: 16px;
+  font-family: var(--font-body);
+  text-decoration: underline;
+  padding: 0;
 }
 
 @media (max-width: 600px) {
-  .home-page {
-    padding: 12px;
-  }
-
-  .feed-title {
-    font-size: 20px;
-  }
+  .home-page { padding: 8px 10px; }
+  .home-rec-banner { flex-direction: column; gap: 6px; text-align: center; }
 }

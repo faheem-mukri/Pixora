@@ -162,16 +162,6 @@ function ProfilePage() {
     setCreatedLoading(false);
   };
 
-  const handleDeletePin = async (imageId) => {
-    if (!window.confirm('Delete this pin? This cannot be undone.')) return;
-    try {
-      await api.delete(`/api/pins/${encodeURIComponent(imageId)}`);
-      setCreatedPins(prev => prev.filter(p => p.id !== imageId));
-    } catch (err) {
-      alert(err.response?.data?.error || 'Failed to delete pin');
-    }
-  };
-
   if (loading) {
     return (
       <div className="profile-page">

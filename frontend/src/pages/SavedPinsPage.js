@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSavedPins } from '../utils/api';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
@@ -14,17 +14,7 @@ function SavedPinsPage() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem('pixora_token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-
-    fetchSavedPins();
-  }, []);
-
-  const fetchSavedPins = async (pageNum = 1) => {
+  const fetchSavedPins = useCallback(async (pageNum = 1) => {
     try {
       if (pageNum === 1) {
         setLoading(true);
@@ -55,7 +45,17 @@ function SavedPinsPage() {
       setLoading(false);
       setLoadingMore(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('pixora_token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    fetchSavedPins();
+  }, [navigate, fetchSavedPins]);
 
   const handleLoadMore = () => {
     if (!loadingMore && hasMore) {

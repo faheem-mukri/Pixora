@@ -69,8 +69,7 @@ const userSchema = new Schema(
 );
 
 // Indexes for performance
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
+// Note: email and username already have indexes from unique: true
 userSchema.index({ 'searchHistory.timestamp': -1 });
 userSchema.index({ 'savedPins.imageId': 1 });
 userSchema.index({ createdAt: -1 });

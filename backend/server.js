@@ -20,8 +20,11 @@ app.use(helmet());
 
 // Restrict CORS to frontend URL only
 const allowedOrigins = [process.env.FRONTEND_URL || 'http://localhost:3000'];
+console.log('Allowed CORS origins:', allowedOrigins);
+
 app.use(cors({
   origin: (origin, callback) => {
+    console.log('Request origin:', origin);
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {

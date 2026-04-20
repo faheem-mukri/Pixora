@@ -1,0 +1,12 @@
+{
+  "name": "pixora",
+  "version": "1.0.0",
+  "description": "Pinterest clone MERN stack",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "start": "cd backend && node server.js",
+    "dev": "cd backend && npm run dev"
+  }
+}

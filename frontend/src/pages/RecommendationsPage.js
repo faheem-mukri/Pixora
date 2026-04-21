@@ -66,7 +66,7 @@ function RecommendationsPage() {
           <div className="no-recommendations-icon">✨</div>
           <h2>No recommendations yet</h2>
           <p>Search for a few topics first and we'll personalise your feed.</p>
-          <button onClick={() => navigate('/')} className="btn-home">Explore images</button>
+          <button onClick={() => navigate('/home')} className="btn-home">Explore images</button>
         </div>
       ) : (
         <InfiniteScroll

@@ -103,15 +103,15 @@ function Header() {
     <header className={`app-header ${scrolled ? 'scrolled' : ''}`}>
 
       {/* ── Logo ── */}
-      <div className="header-logo" onClick={() => navigate('/')}>
+      <div className="header-logo" onClick={() => navigate('/home')}>
         <span className="logo-name">Pixora</span>
       </div>
 
       {/* ── Nav Pills ── */}
       <nav className="header-nav">
         <button
-          className={`nav-pill ${isActive('/') ? 'active' : ''}`}
-          onClick={() => navigate('/')}
+          className={`nav-pill ${isActive('/home') ? 'active' : ''}`}
+          onClick={() => navigate('/home')}
         >
           Home
         </button>

@@ -177,7 +177,7 @@ function ProfilePage() {
       <div className="profile-page">
         <div className="profile-not-found">
           <h2>User not found</h2>
-          <button onClick={() => navigate('/')}>Go home</button>
+          <button onClick={() => navigate('/home')}>Go home</button>
         </div>
       </div>
     );

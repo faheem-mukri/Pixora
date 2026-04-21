@@ -30,7 +30,7 @@ function SignupPage() {
     setLoading(true);
     const result = await register(username, displayName || username, email, password);
     if (result.success) {
-      navigate('/');
+      navigate('/home');
     } else {
       setError(result.message || 'Registration failed');
     }

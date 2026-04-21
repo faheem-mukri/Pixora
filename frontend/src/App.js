@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { RecommendationsProvider } from './context/RecommendationsContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
+import RootRedirect from './pages/RootRedirect';
 import HomePage from './pages/HomePage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import PinDetailPage from './pages/PinDetailPage';
@@ -24,6 +25,9 @@ function App() {
           <RecommendationsProvider>
             <div className="App">
               <Routes>
+                {/* Root redirect — checks token and redirects to /home or /login */}
+                <Route path="/" element={<RootRedirect />} />
+
                 {/* Auth pages — no header */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
@@ -33,7 +37,7 @@ function App() {
                   <>
                     <Header />
                     <Routes>
-                      <Route path="/" element={<HomePage />} />
+                      <Route path="/home" element={<HomePage />} />
                       <Route path="/search" element={<SearchResultsPage />} />
                       <Route path="/pin/:id" element={<PinDetailPage />} />
 

@@ -111,7 +111,7 @@ function SavedPinsPage() {
           <span className="empty-icon">📌</span>
           <h2>No Saved Pins Yet</h2>
           <p>Start exploring and save pins you love!</p>
-          <button onClick={() => navigate('/')} className="explore-btn">
+          <button onClick={() => navigate('/home')} className="explore-btn">
             Explore Pins
           </button>
         </div>

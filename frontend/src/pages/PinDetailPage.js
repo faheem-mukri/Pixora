@@ -229,7 +229,7 @@ function PinDetailPage() {
           <span className="pin-error-icon">🔍</span>
           <h2>Pin not found</h2>
           <p>This pin may have been removed or doesn't exist.</p>
-          <button onClick={() => navigate('/')} className="btn-go-home">Go home</button>
+          <button onClick={() => navigate('/home')} className="btn-go-home">Go home</button>
         </div>
       </div>
     );

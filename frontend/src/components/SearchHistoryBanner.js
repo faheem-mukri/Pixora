@@ -53,7 +53,7 @@ function SearchHistoryBanner() {
 
   // Navigate home without a full page reload
   const handleHistoryClick = () => {
-    navigate('/');
+    navigate('/home');
   };
 
   return (

@@ -156,8 +156,6 @@ function ProfilePage() {
     try {
       const res = await api.get(`/api/pins/created/${username}`);
       setCreatedPins(res.data.pins || []);
-      console.log("IMG:", res.data.pins[0]);
-      console.log("W/H:", res.data.pins[0].width, res.data.pins[0].height);
     } catch (_) {}
     setCreatedLoading(false);
   };

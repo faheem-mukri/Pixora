@@ -11,7 +11,6 @@
 5. Create user: pixora_user
 6. Copy connection string like:
    mongodb+srv://pixora_user:b0EvjDEUciErnAA7@cluster.mongodb.net/pixora?retryWrites=true&w=majority
-   mongodb+srv://faheemworkdev_db_user:b0EvjDEUciErnAA7@cluster0.xifj2yo.mongodb.net/?appName=Cluster0
 7. Keep this URI safe ✅
 ```
 

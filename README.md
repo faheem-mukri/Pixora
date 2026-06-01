@@ -229,7 +229,7 @@ pixora/
 
 Deploy your full MERN stack:
 - **Frontend**: React app on [Vercel](https://vercel.com) 🎨
-- **Backend**: Express API on [Railway](https://railway.app) ⚙️
+- **Backend**: Express API on [Render](https://render.com) ⚙️
 - **Database**: MongoDB on [MongoDB Atlas](https://mongodb.com/cloud/atlas) 💾
 
 **Total time: ~25 minutes** ⏱️

@@ -12,6 +12,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
+const cookies = require('cookie-parser');
 
 const app = express();
 
@@ -33,6 +34,8 @@ app.use(cors({
 
 app.use(express.json({ limit: '10kb' })); // Limit JSON payloads to prevent abuse
 app.use(express.urlencoded({ extended: true, limit: '10kb' })); // Limit URL-encoded payloads
+
+app.use(cookieParser());
 
 // Mongoose 8 — no deprecated options needed
 mongoose.connect(process.env.MONGODB_URI)

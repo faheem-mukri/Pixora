@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 module.exports = function (req, res, next) {
-  const token = req.header('Authorization')?.split(' ')[1];
+  const token = req.cookies.pixora_token;
 
   if (!token) {
     return res.status(401).json({ msg: 'No token provided' });
@@ -9,9 +9,13 @@ module.exports = function (req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = { id: decoded.id };
+
+    req.user = {
+      id: decoded.id
+    };
+
     next();
   } catch (err) {
-    res.status(401).json({ msg: 'Token is invalid' });
+    return res.status(401).json({ msg: 'Token is invalid' });
   }
 };

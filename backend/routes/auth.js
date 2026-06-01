@@ -3,50 +3,17 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
+const { validateEmail, validatePassword, validateUsername } = require('../utils/validators');
 
 // Rate limit login/register to prevent brute-force
 const rateLimit = require('express-rate-limit');
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
-  message: { msg: 'Too many attempts, please try again later.' },
+  message: { error: 'Too many attempts, please try again later', code: 'AUTH_RATE_LIMIT' },
   standardHeaders: true,
   legacyHeaders: false
 });
-
-// Validation helpers
-const validateEmail = (email) => {
-  const trimmed = (email || '').trim().toLowerCase();
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(trimmed) ? trimmed : null;
-};
-
-const validatePassword = (password) => {
-  if (!password || password.length < 8) {
-    return { valid: false, msg: 'Password must be at least 8 characters long' };
-  }
-  if (!/[a-z]/.test(password)) {
-    return { valid: false, msg: 'Password must contain at least one lowercase letter' };
-  }
-  if (!/[A-Z]/.test(password)) {
-    return { valid: false, msg: 'Password must contain at least one uppercase letter' };
-  }
-  if (!/[0-9]/.test(password)) {
-    return { valid: false, msg: 'Password must contain at least one number' };
-  }
-  return { valid: true };
-};
-
-const validateUsername = (username) => {
-  const trimmed = (username || '').trim().toLowerCase();
-  if (trimmed.length < 3 || trimmed.length > 30) {
-    return null;
-  }
-  if (!/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
-    return null;
-  }
-  return trimmed;
-};
 
 // Register
 router.post('/register', authLimiter, async (req, res) => {
@@ -54,56 +21,77 @@ router.post('/register', authLimiter, async (req, res) => {
   try {
     // Validate required fields
     if (!username || !email || !password) {
-      return res.status(400).json({ msg: 'Please provide all required fields' });
+      return res.status(400).json({ error: 'Please provide all required fields', code: 'MISSING_FIELDS' });
     }
 
     // Validate email format
-    const validEmail = validateEmail(email);
-    if (!validEmail) {
-      return res.status(400).json({ msg: 'Please provide a valid email address' });
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      return res.status(400).json({ error: emailCheck.message, code: 'INVALID_EMAIL' });
     }
 
     // Validate username
-    const validUsername = validateUsername(username);
-    if (!validUsername) {
-      return res.status(400).json({ msg: 'Username must be 3-30 characters and contain only letters, numbers, underscores, and hyphens' });
+    const usernameCheck = validateUsername(username);
+    if (!usernameCheck.valid) {
+      return res.status(400).json({ error: usernameCheck.message, code: 'INVALID_USERNAME' });
     }
 
     // Validate password strength
     const passwordCheck = validatePassword(password);
     if (!passwordCheck.valid) {
-      return res.status(400).json({ msg: passwordCheck.msg });
+      return res.status(400).json({ error: passwordCheck.message, code: 'WEAK_PASSWORD' });
     }
 
     // Check for existing username
-    if (await User.findOne({ username: validUsername })) {
-      return res.status(400).json({ msg: 'Username already exists' });
+    if (await User.findOne({ username: usernameCheck.value })) {
+      return res.status(400).json({ error: 'Username already exists', code: 'USERNAME_EXISTS' });
     }
 
     // Check for existing email
-    if (await User.findOne({ email: validEmail })) {
-      return res.status(400).json({ msg: 'Email already registered' });
+    if (await User.findOne({ email: emailCheck.value })) {
+      return res.status(400).json({ error: 'Email already registered', code: 'EMAIL_EXISTS' });
     }
 
     // Sanitize display name
-    const sanitizedDisplayName = displayName ? displayName.trim().slice(0, 50) : validUsername;
+    const sanitizedDisplayName = displayName ? displayName.trim().slice(0, 50) : usernameCheck.value;
 
     const user = await User.create({ 
-      username: validUsername, 
+      username: usernameCheck.value, 
       displayName: sanitizedDisplayName, 
-      email: validEmail, 
+      email: emailCheck.value, 
       password 
     });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    // Issue short-lived access token (15 min) + long-lived refresh token (7 days)
+    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    // Store refresh token in DB
+    user.refreshTokens = [{ token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }];
+    await user.save();
+
+    // Set httpOnly cookies
+    res.cookie('pixora_token', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
     res.status(201).json({
-      token,
-      user: { id: user._id, username: user.username, displayName: user.displayName, email: user.email, avatarUrl: user.avatarUrl }
+      success: true,
+      data: { user: { id: user._id, username: user.username, displayName: user.displayName, avatarUrl: user.avatarUrl } }
     });
   } catch (err) {
     console.error('Registration error:', err);
-    res.status(500).json({ msg: 'An error occurred during registration' });
+    res.status(500).json({ error: 'An error occurred during registration', code: 'REGISTER_ERROR' });
   }
 });
 
@@ -112,40 +100,101 @@ router.post('/login', authLimiter, async (req, res) => {
   const { email, password } = req.body;
   try {
     if (!email || !password) {
-      return res.status(400).json({ msg: 'Please provide email and password' });
+      return res.status(400).json({ error: 'Please provide email and password', code: 'MISSING_CREDENTIALS' });
     }
 
     // Validate email format
-    const validEmail = validateEmail(email);
-    if (!validEmail) {
-      return res.status(400).json({ msg: 'Please provide a valid email address' });
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      return res.status(400).json({ error: emailCheck.message, code: 'INVALID_EMAIL' });
     }
 
-    const user = await User.findOne({ email: validEmail });
+    const user = await User.findOne({ email: emailCheck.value });
     if (!user || !(await user.comparePassword(password))) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials', code: 'INVALID_CREDENTIALS' });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    // Issue short-lived access token (15 min) + long-lived refresh token (7 days)
+    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    // Store refresh token in DB
+    user.refreshTokens = [{ token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }];
+    await user.save();
+
+    // Set httpOnly cookies
+    res.cookie('pixora_token', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
     res.json({
-      token,
-      user: { id: user._id, username: user.username, displayName: user.displayName, email: user.email, avatarUrl: user.avatarUrl }
+      success: true,
+      data: { user: { id: user._id, username: user.username, displayName: user.displayName, avatarUrl: user.avatarUrl } }
     });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ msg: 'An error occurred during login' });
+    res.status(500).json({ error: 'An error occurred during login', code: 'LOGIN_ERROR' });
   }
 });
 
 // Get current user (protected)
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
-    res.json(user);
+    const user = await User.findById(req.user.id).select('-password -refreshTokens');
+    res.json({ success: true, data: { user } });
   } catch (err) {
-    res.status(500).json({ msg: err.message });
+    res.status(500).json({ error: err.message, code: 'USER_FETCH_ERROR' });
   }
+});
+
+// Refresh access token
+router.post('/refresh', async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token required', code: 'NO_REFRESH_TOKEN' });
+    }
+
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    
+    if (!user || !user.refreshTokens.some(rt => rt.token === refreshToken && rt.expiresAt > new Date())) {
+      return res.status(401).json({ error: 'Invalid or expired refresh token', code: 'INVALID_REFRESH' });
+    }
+
+    // Issue new access token
+    const newAccessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    
+    res.cookie('pixora_token', newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000 // 15 minutes
+    });
+
+    res.json({ success: true, data: { accessToken: newAccessToken } });
+  } catch (err) {
+    res.status(401).json({ error: 'Token refresh failed', code: 'REFRESH_FAILED' });
+  }
+});
+
+// Logout
+router.post('/logout', (req, res) => {
+  res.clearCookie('pixora_token');
+  res.clearCookie('refreshToken');
+  res.json({ success: true, message: 'Logged out' });
 });
 
 // Get public profile by username — safe fields only

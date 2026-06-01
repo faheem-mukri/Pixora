@@ -5,22 +5,28 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Load user from localStorage on mount
+  // Check if user is logged in on mount (fetch from server)
   useEffect(() => {
-    const storedToken = localStorage.getItem("pixora_token");
-    const storedUser = localStorage.getItem("pixora_user");
+    const checkAuth = async () => {
+      try {
+        const { data } = await api.get('/api/auth/me');
+        setUser(data.data.user);
+        setIsAuthenticated(true);
+      } catch (err) {
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
-    }, []);
+    checkAuth();
+  }, []);
 
-    // Login function
+  // Login function
   const login = async (email, password) => {
     try {
       const response = await api.post("/api/auth/login", {
@@ -30,67 +36,67 @@ export const AuthProvider = ({ children }) => {
 
       const data = response.data;
 
-      // Save token and user
-      localStorage.setItem("pixora_token", data.token);
-      localStorage.setItem("pixora_user", JSON.stringify(data.user));
-
-      setToken(data.token);
-      setUser(data.user);
+      // Token is stored in httpOnly cookie automatically
+      if (data.data?.user) {
+        setUser(data.data.user);
+        setIsAuthenticated(true);
+      }
 
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.msg || error.message || "Login failed";
+      const message = error.response?.data?.error || error.message || "Login failed";
       return { success: false, message };
     }
   };
 
-    //register function
-    const register = async (username, displayName, email, password) => {
+  // Register function
+  const register = async (username, displayName, email, password) => {
     try {
-        const response = await api.post("/api/auth/register", {
-          username,
-          displayName,
-          email,
-          password,
-        });
+      const response = await api.post("/api/auth/register", {
+        username,
+        displayName,
+        email,
+        password,
+      });
 
-        const data = response.data;
+      const data = response.data;
 
-        // Save token and user
-        localStorage.setItem("pixora_token", data.token);
-        localStorage.setItem("pixora_user", JSON.stringify(data.user));
+      // Token is stored in httpOnly cookie automatically
+      if (data.data?.user) {
+        setUser(data.data.user);
+        setIsAuthenticated(true);
+      }
 
-        setToken(data.token);
-        setUser(data.user);
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.error || error.message || "Registration failed";
+      return { success: false, message };
+    }
+  };
 
-        return { success: true };
-        } catch (error) {
-            const message = error.response?.data?.msg || error.message || "Registration failed";
-            return { success: false, message };
-        }
-    };
+  // Logout function
+  const logout = async () => {
+    try {
+      await api.post('/api/auth/logout');
+    } catch (err) {
+      // Logout anyway even if request fails
+    }
+    setUser(null);
+    setIsAuthenticated(false);
+  };
 
-    //logout function
-    const logout = () => {
-        localStorage.removeItem("pixora_token");
-        localStorage.removeItem("pixora_user");
-        setToken(null);
-        setUser(null);
-    };
+  const value = {
+    user,
+    isLoading,
+    isAuthenticated,
+    login,
+    register,
+    logout
+  };
 
-    const value = {
-        user,
-        token,
-        loading,
-        login,
-        register,
-        logout,
-        isAuthenticated: !!token
-    };
-
-    return (
-        <AuthContext.Provider value={value}>
-        {children}
-        </AuthContext.Provider>
-    );
-}
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};

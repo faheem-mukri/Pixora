@@ -10,24 +10,48 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true // Send cookies automatically
 });
 
-// Request interceptor: Add auth token to requests automatically
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('pixora_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+// Response interceptor: Handle token refresh and common errors
+api.interceptors.response.use(
+  response => response,
+  async error => {
+    const originalRequest = error.config;
+
+    // If 401 and we haven't retried yet, try to refresh token
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+          throw new Error('No refresh token');
+        }
+
+        const { data } = await axios.post(
+          `${API_URL}/api/auth/refresh`,
+          { refreshToken },
+          { withCredentials: true }
+        );
+
+        if (data.data?.accessToken) {
+          localStorage.setItem('refreshToken', data.data.refreshToken || refreshToken);
+          
+          // Retry original request with new token (now in cookie)
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        // Refresh failed, redirect to login
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
     }
-    return config;
-  },
-  (error) => {
+
     return Promise.reject(error);
   }
 );
-
-// Response interceptor: Handle common errors
-api.interceptors.response.use(
   (response) => response,
   (error) => {
     // Network error (no response from server)

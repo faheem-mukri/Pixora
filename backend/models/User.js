@@ -26,6 +26,14 @@ const userSchema = new Schema(
       { query: String, timestamp: { type: Date, default: Date.now } }
     ],
 
+    // Refresh tokens for 7-day session extension
+    refreshTokens: [
+      {
+        token: String,
+        expiresAt: { type: Date, default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }
+      }
+    ],
+
     // Upgraded savedPins — stores full pin metadata
     savedPins: [
       {

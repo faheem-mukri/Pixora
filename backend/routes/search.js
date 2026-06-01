@@ -3,7 +3,7 @@ const axios = require('axios');
 const router = express.Router();
 const User = require('../models/User');
 const auth = require('../middleware/auth');
-const LRU = require('lru-cache');
+const { LRUCache } = require('lru-cache');
 const { validatePagination } = require('../utils/validators');
 
 // ─────────────────────────────────────────
@@ -11,7 +11,7 @@ const { validatePagination } = require('../utils/validators');
 // Prevents hammering Pexels (45 req/hr free tier)
 // LRU evicts oldest entries when max size reached
 // ─────────────────────────────────────────
-const cache = new LRU({
+const cache = new LRUCache({
   max: 500,           // Max 500 entries
   ttl: 1000 * 60 * 60 // 1 hour default TTL
 });

@@ -25,26 +25,20 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) {
-          throw new Error('No refresh token');
-        }
-
+        
         const { data } = await axios.post(
           `${API_URL}/api/auth/refresh`,
-          { refreshToken },
+          {},
           { withCredentials: true }
         );
 
         if (data.data?.accessToken) {
-          localStorage.setItem('refreshToken', data.data.refreshToken || refreshToken);
           
           // Retry original request with new token (now in cookie)
           return api(originalRequest);
         }
       } catch (refreshError) {
         // Refresh failed, redirect to login
-        localStorage.removeItem('refreshToken');
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }

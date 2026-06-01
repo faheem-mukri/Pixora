@@ -55,9 +55,24 @@ const validateSearchQuery = (query) => {
   return { valid: true, value: validator.escape(trimmed) };
 };
 
+const validatePagination = (page, limit) => {
+  const p = parseInt(page) || 1;
+  const l = parseInt(limit) || 20;
+  
+  if (p < 1) {
+    return { valid: false, error: 'Page must be >= 1' };
+  }
+  if (l < 1 || l > 100) {
+    return { valid: false, error: 'Limit must be between 1 and 100' };
+  }
+  
+  return { valid: true, page: p, limit: l };
+};
+
 module.exports = {
   validateEmail,
   validatePassword,
   validateUsername,
-  validateSearchQuery
+  validateSearchQuery,
+  validatePagination
 };

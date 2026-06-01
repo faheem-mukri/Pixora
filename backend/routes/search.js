@@ -3,26 +3,25 @@ const axios = require('axios');
 const router = express.Router();
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const LRU = require('lru-cache');
+const { validatePagination } = require('../utils/validators');
 
 // ─────────────────────────────────────────
-// SERVER-SIDE CACHE
+// SERVER-SIDE CACHE WITH LRU
 // Prevents hammering Pexels (45 req/hr free tier)
-// Cache is per-key, expires after TTL ms
+// LRU evicts oldest entries when max size reached
 // ─────────────────────────────────────────
-const cache = new Map();
+const cache = new LRU({
+  max: 500,           // Max 500 entries
+  ttl: 1000 * 60 * 60 // 1 hour default TTL
+});
 
 function getCache(key) {
-  const entry = cache.get(key);
-  if (!entry) return null;
-  if (Date.now() > entry.expiresAt) {
-    cache.delete(key);
-    return null;
-  }
-  return entry.data;
+  return cache.get(key);
 }
 
-function setCache(key, data, ttlMs) {
-  cache.set(key, { data, expiresAt: Date.now() + ttlMs });
+function setCache(key, data, ttlMs = 1000 * 60 * 60) {
+  cache.set(key, data, { ttl: ttlMs });
 }
 
 const CACHE_TTL = {
@@ -127,7 +126,11 @@ router.get('/pin/:id', async (req, res) => {
 // ─────────────────────────────────────────
 router.get('/recommendations', auth, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
+    const paginationCheck = validatePagination(req.query.page, req.query.limit);
+    if (!paginationCheck.valid) {
+      return res.status(400).json({ error: paginationCheck.error, code: 'INVALID_PAGINATION' });
+    }
+    const page = paginationCheck.page;
     const user = await User.findById(req.user.id).select('searchHistory');
 
     if (!user || !user.searchHistory?.length) {

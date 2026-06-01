@@ -16,6 +16,8 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 
+app.set('trust proxy', 1); // Trust first proxy for secure cookies if behind a proxy
+
 // Security headers
 app.use(helmet());
 

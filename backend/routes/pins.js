@@ -3,9 +3,13 @@ const router = express.Router();
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { Readable } = require('stream');
+const mongoose = require('mongoose');
+const fileType = require('file-type');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
 const Pin = require('../models/Pin');
+const { apiLimiter } = require('../middleware/rateLimiter');
+const { validatePagination } = require('../utils/validators');
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -16,11 +20,22 @@ cloudinary.config({
 // Multer setup for handling file uploads
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB limit
-    fileFilter: (req, file, cb) => {
-        const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-        if (allowed.includes(file.mimetype)) cb(null, true);
-        else cb(new Error('Only JPEG, JPG, PNG, GIF, and WEBP files are allowed'));
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit (reduced from 20MB)
+    fileFilter: async (req, file, cb) => {
+        try {
+            // Validate actual file magic bytes, not just MIME type
+            const type = await fileType.fromBuffer(file.buffer);
+            
+            const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            
+            if (!type || !allowed.includes(type.mime)) {
+                return cb(new Error('Only JPEG, PNG, GIF, and WEBP files are allowed'));
+            }
+            
+            cb(null, true);
+        } catch (err) {
+            cb(err);
+        }
     }
 });
 
@@ -47,7 +62,7 @@ function uploadToCloudinary(buffer, options = {}) {
 // POST /api/pins/create
 // Uploads to Cloudinary → saves to createdPins
 // ─────────────────────────────────────
-router.post('/create', auth, upload.single('image'), async (req, res) => {
+router.post('/create', auth, apiLimiter, upload.single('image'), async (req, res) => {
   try {
     if (!req.file && !req.body.imageUrl) {
       return res.status(400).json({ error: 'Image file or URL is required' });
@@ -239,7 +254,7 @@ router.get('/pin/:id', async (req, res) => {
  * POST /api/pins/save
  * Save a pin to user's saved collection
  */
-router.post('/save', auth, async (req, res) => {
+router.post('/save', auth, apiLimiter, async (req, res) => {
   try {
     const userId = req.user.id;
     const { 
@@ -388,11 +403,14 @@ router.delete('/unsave/:imageId', auth, async (req, res) => {
  * GET /api/pins/saved
  * Get all saved pins for authenticated user (paginated)
  */
-router.get('/saved', auth, async (req, res) => {
+router.get('/saved', auth, apiLimiter, async (req, res) => {
   try {
     const userId = req.user.id;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const paginationCheck = validatePagination(req.query.page, req.query.limit);
+    if (!paginationCheck.valid) {
+      return res.status(400).json({ error: paginationCheck.error, code: 'INVALID_PAGINATION' });
+    }
+    const { page, limit } = paginationCheck;
     const skip = (page - 1) * limit;
 
     const user = await User.findById(userId);
@@ -473,58 +491,49 @@ router.get('/saved/:imageId', auth, async (req, res) => {
 
 /**
  * POST /api/pins/like/:imageId
- * Like a pin
+ * Like a pin - atomic operation to prevent duplicates
  */
-router.post('/like/:imageId', auth, async (req, res) => {
+router.post('/like/:imageId', auth, apiLimiter, async (req, res) => {
   try {
     const userId = req.user.id;
     const { imageId } = req.params;
 
     if (!imageId) {
-      return res.status(400).json({ error: 'imageId is required' });
+      return res.status(400).json({ error: 'imageId is required', code: 'MISSING_IMAGE_ID' });
     }
 
     // Check if user exists
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: 'User not found', code: 'USER_NOT_FOUND' });
     }
 
-    // Check if already liked
-    const pin = await Pin.findOne({ imageId });
-    if (pin) {
-      const alreadyLiked = pin.likedBy.some(
-        like => like.userId.toString() === userId
-      );
-      if (alreadyLiked) {
-        return res.status(400).json({ 
-          error: 'Pin already liked',
-          alreadyLiked: true 
-        });
-      }
-    }
-
-    // Add to likedBy and increment count
+    // Use atomic findOneAndUpdate with query check to prevent duplicates
+    const objectIdUserId = new mongoose.Types.ObjectId(userId);
     const updatedPin = await Pin.findOneAndUpdate(
-      { imageId },
       { 
-        $addToSet: { likedBy: { userId, likedAt: new Date() } },
+        imageId,
+        'likedBy.userId': { $ne: objectIdUserId } // Only update if NOT already liked
+      },
+      { 
+        $addToSet: { likedBy: { userId: objectIdUserId, likedAt: new Date() } },
         $inc: { likeCount: 1 }
       },
       { new: true, upsert: true }
     );
 
+    if (!updatedPin) {
+      return res.status(400).json({ error: 'Pin already liked', code: 'ALREADY_LIKED', alreadyLiked: true });
+    }
+
     res.status(200).json({
       success: true,
       message: 'Pin liked successfully',
-      likeCount: updatedPin.likeCount,
-      imageId
+      data: { likeCount: updatedPin.likeCount, imageId }
     });
   } catch (error) {
     console.error('Error liking pin:', error);
-    res.status(500).json({ 
-      error: 'Failed to like pin'
-    });
+    res.status(500).json({ error: 'Failed to like pin', code: 'LIKE_ERROR' });
   }
 });
 

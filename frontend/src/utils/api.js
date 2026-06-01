@@ -53,5 +53,58 @@ api.interceptors.response.use(
   }
 );
 
+// ==================== PIN API FUNCTIONS ====================
+
+//Save a pin
+
+export const savePin = async (pinData) => {
+  const response = await api.post('/api/pins/save', pinData);
+  return response.data;
+};
+
+// Unsave a pin
+export const unsavePin = async (imageId) => {
+  const response = await api.post(`/api/pins/unsave/${imageId}`);
+  return response.data;
+};
+
+// Get saved pins (paginated)
+export const getSavedPins = async (page = 1, limit = 20) => {
+  const response = await api.get('/api/pins/saved', {
+    params: { page, limit }
+  });
+  return response.data;
+};
+
+// Check if pin is saved
+export const checkPinSaved = async (imageId) => {
+  const response = await api.get(`/api/pins/saved/${imageId}`);
+  return response.data;
+};
+
+// Like a pin
+export const likePin = async (imageId) => {
+  const response = await api.post(`/api/pins/like/${imageId}`);
+  return response.data;
+};
+
+// Unlike a pin
+export const unlikePin = async (imageId) => {
+  const response = await api.post(`/api/pins/unlike/${imageId}`);
+  return response.data;
+};
+
+// Get total likes for a pin
+export const getPinLikes = async (imageId) => {
+  const response = await api.get(`/api/pins/likes/${imageId}`);
+  return response.data;
+};
+
+// Check if pin is liked by current user
+export const checkPinLiked = async (imageId) => {
+  const response = await api.get(`/api/pins/liked/${imageId}`);
+  return response.data;
+};
+
 export default api;
 

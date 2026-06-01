@@ -18,9 +18,10 @@ api.interceptors.response.use(
   response => response,
   async error => {
     const originalRequest = error.config;
+    const isAuthCheckRequest = originalRequest.url?.includes('/api/auth/me');
 
     // If 401 and we haven't retried yet, try to refresh token
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthCheckRequest) {
       originalRequest._retry = true;
 
       try {

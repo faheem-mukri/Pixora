@@ -1,3 +1,6 @@
+console.log("SERVER.JS IS EXECUTING");
+throw new Error("INTENTIONAL TEST");
+
 require('dotenv').config();
 
 // Validate required env vars on startup

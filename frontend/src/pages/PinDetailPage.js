@@ -161,8 +161,16 @@ function PinDetailPage() {
 
     try {
       if (!isLiked) {
-        // Like pin
-        const response = await likePin(String(image.id));
+        const response = await likePin({
+          imageId: String(image.id),
+          imageUrl: image.src.large,
+          thumbnailUrl: image.src.medium,
+          title: image.title || '',
+          description: image.description || '',
+          photographer: image.photographer || '',
+          width: image.width || 400,
+          height: image.height || 600,
+        });
         setLikeCount(response.data.likeCount);
       } else {
         // Unlike pin

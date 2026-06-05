@@ -508,15 +508,37 @@ router.post('/like/:imageId', auth, apiLimiter, async (req, res) => {
       return res.status(404).json({ error: 'User not found', code: 'USER_NOT_FOUND' });
     }
 
-    // Use atomic findOneAndUpdate with query check to prevent duplicates
+    const {
+      imageUrl = '',
+      thumbnailUrl = '',
+      title = '',
+      description = '',
+      photographer = '',
+      width = 400,
+      height = 600,
+    } = req.body;
+
     const objectIdUserId = new mongoose.Types.ObjectId(userId);
 
-    const pin = await Pin.findOne({ imageId });
+    // Atomically add like if not already liked
+    let pin = await Pin.findOne({ imageId });
 
     if (!pin) {
-      return res.status(404).json({
-        error: 'Pin not found',
-        code: 'PIN_NOT_FOUND'
+      pin = await Pin.create({
+        imageId,
+        metadata: {
+          imageUrl,
+          thumbnailUrl,
+          title,
+          description,
+          photographer,
+          width,
+          height,
+          isUserCreated: false
+        },
+        likeCount: 0,
+        saveCount: 0,
+        likedBy: []
       });
     }
 
@@ -564,29 +586,35 @@ router.delete('/unlike/:imageId', auth, async (req, res) => {
     const userId = req.user.id;
     const { imageId } = req.params;
 
-    if (!imageId) {
-      return res.status(400).json({ error: 'imageId is required' });
-    }
-
-    // Remove from likedBy and decrement count
-    const updatedPin = await Pin.findOneAndUpdate(
-      { imageId },
-      { 
-        $pull: { likedBy: { userId } },
-        $inc: { likeCount: -1 }
-      },
-      { new: true }
-    );
-
-    if (!updatedPin) {
+    const pin = await Pin.findOne({ imageId });
+    if (!pin) {
       return res.status(404).json({ error: 'Pin not found' });
     }
+
+    const wasLiked = pin.likedBy.some(
+      like => like.userId.toString() === userId
+    );
+
+    if (!wasLiked) {
+      return res.status(400).json({ 
+        error: 'Pin not liked yet',
+        code: 'NOT_LIKED'
+      });
+    }
+
+    pin.likedBy = pin.likedBy.filter(
+      like => like.userId.toString() !== userId
+    );
+
+    pin.likeCount = Math.max(0, pin.likeCount - 1);
+
+    await pin.save();
 
     res.status(200).json({
       success: true,
       message: 'Pin unliked successfully',
       data: { 
-        likeCount: Math.max(0, updatedPin.likeCount),
+        likeCount: Math.max(0, pin.likeCount),
         imageId 
     }
     });

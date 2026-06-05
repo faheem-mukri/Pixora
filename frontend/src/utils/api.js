@@ -78,8 +78,8 @@ export const checkPinSaved = async (imageId) => {
 };
 
 // Like a pin
-export const likePin = async (imageId) => {
-  const response = await api.post(`/api/pins/like/${imageId}`);
+export const likePin = async (pinData) => {
+  const response = await api.post(`/api/pins/like/${pinData.imageId}`, pinData);
   return response.data;
 };
 

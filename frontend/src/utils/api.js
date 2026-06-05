@@ -59,7 +59,7 @@ export const savePin = async (pinData) => {
 
 // Unsave a pin
 export const unsavePin = async (imageId) => {
-  const response = await api.post(`/api/pins/unsave/${imageId}`);
+  const response = await api.delete(`/api/pins/unsave/${imageId}`);
   return response.data;
 };
 
@@ -85,7 +85,7 @@ export const likePin = async (imageId) => {
 
 // Unlike a pin
 export const unlikePin = async (imageId) => {
-  const response = await api.post(`/api/pins/unlike/${imageId}`);
+  const response = await api.delete(`/api/pins/unlike/${imageId}`);
   return response.data;
 };
 

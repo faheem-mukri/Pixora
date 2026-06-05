@@ -519,7 +519,7 @@ router.post('/like/:imageId', auth, apiLimiter, async (req, res) => {
         $addToSet: { likedBy: { userId: objectIdUserId, likedAt: new Date() } },
         $inc: { likeCount: 1 }
       },
-      { new: true, upsert: true }
+      { new: true }
     );
 
     if (!updatedPin) {

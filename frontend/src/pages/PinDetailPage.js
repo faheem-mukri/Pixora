@@ -100,7 +100,7 @@ function PinDetailPage() {
     fetchPinDetails();
     // Scroll to top on new pin
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [id]);
+  }, [id, isAuthenticated]);
 
   const handleSavePin = async () => {
     if (!isAuthenticated) {

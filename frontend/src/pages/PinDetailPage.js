@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api, { savePin, unsavePin, checkPinSaved, likePin, unlikePin, checkPinLiked, getPinLikes } from '../utils/api';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import ImageCard from '../components/ImageCard';
 import './PinDetailPage.css';
 
 function PinDetailPage() {
   const { id } = useParams();
+  const { isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -59,8 +62,7 @@ function PinDetailPage() {
         setRelatedImages(related.data.photos.filter(p => String(p.id) !== String(cleanId)));
 
         // Check if pin is saved and liked (only if user is logged in)
-        const token = localStorage.getItem('pixora_token');
-        if (token) {
+        if (isAuthenticated) {
           // Check saved status
           try {
             const savedStatus = await checkPinSaved(cleanId);
@@ -81,7 +83,6 @@ function PinDetailPage() {
         } else {
           setCheckingSaved(false);
         }
-
         // Get like count (public, no auth needed)
         try {
           const likesData = await getPinLikes(cleanId);
@@ -102,8 +103,7 @@ function PinDetailPage() {
   }, [id]);
 
   const handleSavePin = async () => {
-    const token = localStorage.getItem('pixora_token');
-    if (!token) {
+    if (!isAuthenticated) {
       navigate('/login');
       return;
     }
@@ -146,8 +146,7 @@ function PinDetailPage() {
   };
 
   const handleLikePin = async () => {
-    const token = localStorage.getItem('pixora_token');
-    if (!token) {
+    if (!isAuthenticated) {
       navigate('/login');
       return;
     }
@@ -164,11 +163,11 @@ function PinDetailPage() {
       if (!isLiked) {
         // Like pin
         const response = await likePin(String(image.id));
-        setLikeCount(response.likeCount);
+        setLikeCount(response.data.likeCount);
       } else {
         // Unlike pin
         const response = await unlikePin(String(image.id));
-        setLikeCount(response.likeCount);
+        setLikeCount(response.data.likeCount);
       }
     } catch (err) {
       // Revert optimistic update on error

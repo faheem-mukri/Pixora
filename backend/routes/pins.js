@@ -529,7 +529,10 @@ router.post('/like/:imageId', auth, apiLimiter, async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Pin liked successfully',
-      data: { likeCount: updatedPin.likeCount, imageId }
+      data: { 
+        likeCount: updatedPin.likeCount,
+        imageId 
+      }
     });
   } catch (error) {
     console.error('Error liking pin:', error);
@@ -567,8 +570,10 @@ router.delete('/unlike/:imageId', auth, async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Pin unliked successfully',
-      likeCount: Math.max(0, updatedPin.likeCount),
-      imageId
+      data: { 
+        likeCount: Math.max(0, updatedPin.likeCount),
+        imageId 
+    }
     });
   } catch (error) {
     console.error('Error unliking pin:', error);

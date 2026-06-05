@@ -510,32 +510,42 @@ router.post('/like/:imageId', auth, apiLimiter, async (req, res) => {
 
     // Use atomic findOneAndUpdate with query check to prevent duplicates
     const objectIdUserId = new mongoose.Types.ObjectId(userId);
-    const updatedPin = await Pin.findOneAndUpdate(
-      { 
-        imageId,
-        'likedBy.userId': { $ne: objectIdUserId } // Only update if NOT already liked
-      },
-      { 
-        $addToSet: { likedBy: { userId: objectIdUserId, likedAt: new Date() } },
-        $inc: { likeCount: 1 }
-      },
-      { new: true }
+
+    const pin = await Pin.findOne({ imageId });
+
+    if (!pin) {
+      return res.status(404).json({
+        error: 'Pin not found',
+        code: 'PIN_NOT_FOUND'
+      });
+    }
+
+    const alreadyLiked = pin.likedBy.some(
+      like => like.userId.toString() === userId
     );
 
-    console.log("LIKE ROUTE");
-    console.log("ImageId:", imageId);
-    console.log("UserId:", userId);
-    console.log("updatedPin:", updatedPin);
-
-    if (!updatedPin) {
-      return res.status(400).json({ error: 'Pin already liked', code: 'ALREADY_LIKED', alreadyLiked: true });
+    if (alreadyLiked) {
+      return res.status(400).json({
+        error: 'Pin already liked',
+        code: 'ALREADY_LIKED',
+        alreadyLiked: true
+      });
     }
+
+    pin.likedBy.push({
+      userId: objectIdUserId,
+      likedAt: new Date()
+    });
+
+    pin.likeCount += 1;
+
+    await pin.save();
 
     res.status(200).json({
       success: true,
       message: 'Pin liked successfully',
       data: { 
-        likeCount: updatedPin.likeCount,
+        likeCount: pin.likeCount,
         imageId 
       }
     });

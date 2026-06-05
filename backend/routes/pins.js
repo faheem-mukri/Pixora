@@ -522,6 +522,11 @@ router.post('/like/:imageId', auth, apiLimiter, async (req, res) => {
       { new: true }
     );
 
+    console.log("LIKE ROUTE");
+    console.log("ImageId:", imageId);
+    console.log("UserId:", userId);
+    console.log("updatedPin:", updatedPin);
+
     if (!updatedPin) {
       return res.status(400).json({ error: 'Pin already liked', code: 'ALREADY_LIKED', alreadyLiked: true });
     }
@@ -636,8 +641,18 @@ router.get('/liked/:imageId', auth, async (req, res) => {
     const userId = req.user.id;
     const { imageId } = req.params;
 
+    console.log("CHECK LIKED");
+    console.log("ImageId:", imageId);
+    console.log("UserId:", userId);
+
     const pin = await Pin.findOne({ imageId });
     
+    console.log("Pin found:", !!pin);
+
+    if (pin) {
+      console.log("likedBy:", JSON.stringify(pin.likedBy, null, 2));
+    }
+
     if (!pin) {
       return res.status(200).json({ 
         isLiked: false,

@@ -1,8 +1,7 @@
-console.log("SERVER.JS IS EXECUTING");
-throw new Error("INTENTIONAL TEST");
-
+console.log('Starting server...');
 require('dotenv').config();
 
+console.log('Environment variables loaded');
 // Validate required env vars on startup
 const REQUIRED_ENV = ['MONGODB_URI', 'JWT_SECRET', 'PEXELS_API_KEY'];
 REQUIRED_ENV.forEach((key) => {
@@ -11,14 +10,17 @@ REQUIRED_ENV.forEach((key) => {
   }
 });
 
+console.log('All required environment variables are set');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 
+console.log('Express app initialized');
 const app = express();
 
+console.log('Setting trust proxy for secure cookies');
 app.set('trust proxy', 1); // Trust first proxy for secure cookies if behind a proxy
 
 // Security headers
@@ -42,6 +44,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' })); // Limit URL-enc
 
 app.use(cookieParser());
 
+console.log('Connecting to MongoDB...');  
 // Mongoose 8 — no deprecated options needed
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected'))
@@ -54,6 +57,7 @@ const authRoutes = require('./routes/auth');
 const searchRoutes = require('./routes/search');
 const pinsRoutes = require('./routes/pins');
 
+console.log('Route handlers loaded');
 app.use('/api/auth', authRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/pins', pinsRoutes);
@@ -90,5 +94,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error', code: 'INTERNAL_ERROR' });
 });
 
+console.log('Starting server...');
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

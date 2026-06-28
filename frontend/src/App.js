@@ -37,9 +37,9 @@ function App() {
                   <>
                     <Header />
                     <Routes>
-                      <Route path="/home" element={<ProtectedRoute> <HomePage /> </ProtectedRoute>} />
-                      <Route path="/search" element={<ProtectedRoute>  <SearchResultsPage /> </ProtectedRoute>} />
-                      <Route path="/pin/:id" element={<ProtectedRoute> <PinDetailPage /> </ProtectedRoute>} />
+                      <Route path="/home" element={<HomePage /> } />
+                      <Route path="/search" element={ <SearchResultsPage /> } />
+                      <Route path="/pin/:id" element={<PinDetailPage />} />
 
                       {/* Protected */}
                       <Route path="/recommendations" element={

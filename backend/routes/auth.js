@@ -4,6 +4,12 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 const { validateEmail, validatePassword, validateUsername } = require('../utils/validators');
+const {
+  accessCookieOptions,
+  refreshCookieOptions,
+  clearCookieOptions,
+  REFRESH_MAX_AGE,
+} = require('../utils/cookies');
 
 // Rate limit login/register to prevent brute-force
 const rateLimit = require('express-rate-limit');
@@ -66,24 +72,13 @@ router.post('/register', authLimiter, async (req, res) => {
     const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
     const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    // Store refresh token in DB
-    user.refreshTokens = [{ token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }];
+    // Store refresh token in DB (multi-device: append, don't overwrite)
+    user.addRefreshToken(refreshToken, new Date(Date.now() + REFRESH_MAX_AGE));
     await user.save();
 
     // Set httpOnly cookies
-    res.cookie('pixora_token', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
-      maxAge: 15 * 60 * 1000 // 15 minutes
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    res.cookie('pixora_token', accessToken, accessCookieOptions());
+    res.cookie('refreshToken', refreshToken, refreshCookieOptions());
 
     res.status(201).json({
       success: true,
@@ -118,24 +113,13 @@ router.post('/login', authLimiter, async (req, res) => {
     const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
     const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    // Store refresh token in DB
-    user.refreshTokens = [{ token: refreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }];
+    // Store refresh token in DB (multi-device: append, don't overwrite)
+    user.addRefreshToken(refreshToken, new Date(Date.now() + REFRESH_MAX_AGE));
     await user.save();
 
     // Set httpOnly cookies
-    res.cookie('pixora_token', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
-      maxAge: 15 * 60 * 1000 // 15 minutes
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
+    res.cookie('pixora_token', accessToken, accessCookieOptions());
+    res.cookie('refreshToken', refreshToken, refreshCookieOptions());
 
     res.json({
       success: true,
@@ -177,12 +161,7 @@ router.post('/refresh', async (req, res) => {
     // Issue new access token
     const newAccessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
     
-    res.cookie('pixora_token', newAccessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
-      maxAge: 15 * 60 * 1000 // 15 minutes
-    });
+    res.cookie('pixora_token', newAccessToken, accessCookieOptions());
 
     res.json({ success: true, data: { accessToken: newAccessToken } });
   } catch (err) {
@@ -191,9 +170,22 @@ router.post('/refresh', async (req, res) => {
 });
 
 // Logout
-router.post('/logout', (req, res) => {
-  res.clearCookie('pixora_token');
-  res.clearCookie('refreshToken');
+router.post('/logout', async (req, res) => {
+  const presented = req.cookies.refreshToken;
+  if (presented) {
+    try {
+      const decoded = jwt.verify(presented, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id);
+      if (user) {
+        user.removeRefreshToken(presented);
+        await user.save();
+      }
+    } catch (_) {
+      // Invalid/expired token — still clear cookies below.
+    }
+  }
+  res.clearCookie('pixora_token', clearCookieOptions());
+  res.clearCookie('refreshToken', clearCookieOptions());
   res.json({ success: true, message: 'Logged out' });
 });
 

@@ -93,4 +93,20 @@ userSchema.methods.comparePassword = function (pwd) {
   return bcrypt.compare(pwd, this.password);
 };
 
+// Add a refresh token while preserving other devices' sessions.
+// Prunes expired tokens and caps the list to the most recent `maxTokens`.
+userSchema.methods.addRefreshToken = function (token, expiresAt, maxTokens = 10) {
+  const now = new Date();
+  this.refreshTokens = (this.refreshTokens || []).filter(rt => rt.expiresAt > now);
+  this.refreshTokens.push({ token, expiresAt });
+  if (this.refreshTokens.length > maxTokens) {
+    this.refreshTokens = this.refreshTokens.slice(-maxTokens);
+  }
+};
+
+// Remove a specific refresh token (e.g. on logout from one device).
+userSchema.methods.removeRefreshToken = function (token) {
+  this.refreshTokens = (this.refreshTokens || []).filter(rt => rt.token !== token);
+};
+
 module.exports = model('User', userSchema);

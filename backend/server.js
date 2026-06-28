@@ -26,8 +26,12 @@ app.set('trust proxy', 1); // Trust first proxy for secure cookies if behind a p
 // Security headers
 app.use(helmet());
 
-// Restrict CORS to frontend URL only
-const allowedOrigins = [process.env.FRONTEND_URL || 'http://localhost:3000'];
+// Restrict CORS to configured frontend origin(s).
+// Supports a comma-separated list via FRONTEND_URLS or a single FRONTEND_URL.
+const allowedOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:3000')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {

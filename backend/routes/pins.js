@@ -143,7 +143,7 @@ router.post('/create', auth, apiLimiter, upload.single('image'), async (req, res
   } catch (error) {
     console.error('Create pin error:', error);
     if (error.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ error: 'File too large. Max 20MB.' });
+      return res.status(400).json({ error: 'File too large. Max 5MB.' });
     }
     res.status(500).json({ error: error.message || 'Failed to create pin' });
   }
@@ -679,17 +679,7 @@ router.get('/liked/:imageId', auth, async (req, res) => {
     const userId = req.user.id;
     const { imageId } = req.params;
 
-    console.log("CHECK LIKED");
-    console.log("ImageId:", imageId);
-    console.log("UserId:", userId);
-
     const pin = await Pin.findOne({ imageId });
-    
-    console.log("Pin found:", !!pin);
-
-    if (pin) {
-      console.log("likedBy:", JSON.stringify(pin.likedBy, null, 2));
-    }
 
     if (!pin) {
       return res.status(200).json({ 

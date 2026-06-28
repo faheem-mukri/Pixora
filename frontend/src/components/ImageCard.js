@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import api from '../utils/api';
+import { useAuth } from '../hooks/useAuth';
 import './ImageCard.css';
 
 function ImageCard({ image, onClick }) {
   const [isSaved, setIsSaved] = useState(false);
+  const { isAuthenticated } = useAuth();
   const aspectRatio = 
     image.height && image.width ? image.height / image.width : 1.5; // default to 3:2 if missing
   const photographer = image.photographer || 'Unknown';
@@ -12,9 +14,8 @@ function ImageCard({ image, onClick }) {
   const handleSave = async (e) => {
     e.stopPropagation(); // Don't trigger card click
 
-    // Check login using the correct token key
-    const token = localStorage.getItem('pixora_token');
-    if (!token) {
+    // Auth is tracked via httpOnly cookie + auth context, not localStorage
+    if (!isAuthenticated) {
       alert('Please login to save pins');
       return;
     }

@@ -48,14 +48,10 @@ function SavedPinsPage() {
   }, [navigate]);
 
   useEffect(() => {
-    const token = localStorage.getItem('pixora_token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-
+    // Route is protected by ProtectedRoute; the fetch's 401 handler covers
+    // any expired-session case. Auth lives in an httpOnly cookie, not localStorage.
     fetchSavedPins();
-  }, [navigate, fetchSavedPins]);
+  }, [fetchSavedPins]);
 
   const handleLoadMore = () => {
     if (!loadingMore && hasMore) {

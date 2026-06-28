@@ -1,20 +1,21 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 function RootRedirect() {
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
-    const token = localStorage.getItem('pixora_token');
+    // Wait for the server-side auth check (httpOnly cookie) to finish.
+    if (isLoading) return;
 
-    if (token) {
-      // User has token → go to home page
+    if (isAuthenticated) {
       navigate('/home', { replace: true });
     } else {
-      // No token → go to login page
       navigate('/login', { replace: true });
     }
-  }, [navigate]);
+  }, [isAuthenticated, isLoading, navigate]);
 
   return null; // This component doesn't render anything
 }

@@ -6,3 +6,27 @@ services:
     buildCommand: npm install
     startCommand: npm start
     autoDeploy: true
+    envVars:
+      # Ensures cookies are issued with Secure=true
+      - key: NODE_ENV
+        value: production
+      # Frontend (Vercel) and backend (Render) are different sites, so the
+      # auth cookies must be SameSite=None; Secure to be sent cross-site.
+      - key: COOKIE_CROSS_SITE
+        value: "true"
+      # Exact Vercel origin allowed by CORS (set the real value in the dashboard).
+      - key: FRONTEND_URL
+        sync: false
+      # Secrets — set these in the Render dashboard, not in source control.
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: PEXELS_API_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
